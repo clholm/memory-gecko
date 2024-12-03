@@ -53,12 +53,12 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		// home, err := os.UserHomeDir()
+		// cobra.CheckErr(err)
 
-		// Search config in home directory with name ".memory-gecko" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
+		// Search config in ./configs file
+		viper.AddConfigPath("./configs")
+		viper.SetConfigType("json")
 		viper.SetConfigName(".memory-gecko")
 	}
 
