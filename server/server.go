@@ -30,7 +30,7 @@ func NewServer(
 	err := addRoutes(
 		mux,
 		logger,
-		config,
+		// config,
 	)
 	var handler http.Handler = mux
 	if err != nil {
@@ -42,7 +42,7 @@ func NewServer(
 	return handler, nil
 }
 
-func serv(logger *log.Logger, config *Config) error {
+func serv(logger *log.Logger, config *Config, ctx context.Context, stderr io.Writer) error {
 	// create server instance
 	srv, err := NewServer(
 		logger,
@@ -59,7 +59,7 @@ func serv(logger *log.Logger, config *Config) error {
 	go func() {
 		log.Printf("listening on %s\n", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
+			fmt.Fprintf(stderr, "error listening and serving: %s\n", err)
 		}
 	}()
 	// waitgroup that waits on server shutdown goroutine
@@ -74,7 +74,7 @@ func serv(logger *log.Logger, config *Config) error {
 		shutdownCtx, cancel := context.WithTimeout(shutdownCtx, 10*time.Second)
 		defer cancel()
 		if err := httpServer.Shutdown(shutdownCtx); err != nil {
-			fmt.Fprintf(os.Stderr, "error shutting down http server: %s\n", err)
+			fmt.Fprintf(stderr, "error shutting down http server: %s\n", err)
 		}
 	}()
 	wg.Wait()
@@ -82,32 +82,27 @@ func serv(logger *log.Logger, config *Config) error {
 }
 
 // essentially the "main" function of this server
-func run(
+func Run(
 	ctx context.Context,
 	stdin io.Reader,
 	stdout io.Writer,
+	stderr io.Writer,
+	host, port string,
 ) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
-	// create Config
+	// create Config object
 	config := Config{
-		Host: "localhost",
-		Port: "8080",
+		Host: host,
+		Port: port,
 	}
+	// create log object
+	loggo := log.New(stdout, "memory-gecko:", log.LstdFlags)
 	// call serv
-	err := serv(&config)
+	err := serv(loggo, &config, ctx, stderr)
 	if err != nil {
 		return err
 	}
 	// ...
 	return nil
 }
-
-// TODO: put this in the function that starts the server
-// func main() {
-// 	ctx := context.Background()
-// 	if err := run(ctx, os.Stdout, os.Args); err != nil {
-// 		fmt.Fprintf(os.Stderr, "%s\n", err)
-// 		os.Exit(1)
-// 	}
-// }

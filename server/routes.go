@@ -8,7 +8,7 @@ import (
 func addRoutes(
 	mux *http.ServeMux,
 	logger *log.Logger,
-	config *Config,
+	// config *Config,
 ) error {
 	// add error handling logic for errors returned by handlers (lol)
 	// mux.Handle("/api/v1/", handleRootGet(logger))

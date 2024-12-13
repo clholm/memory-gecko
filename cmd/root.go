@@ -15,7 +15,7 @@ var rootCmd = &cobra.Command{
 	Use:   "memory-gecko",
 	Short: "memory-gecko helps you watch YouTube videos that follow iPhone's default naming convention.",
 	Long: `memory-gecko helps you watch YouTube videos that follow iPhone's default naming convention, 
-	IMG_XXXX. Inspired by https://walzr.com/IMG_0001 and https://ben-mini.github.io/2024/img-0416,
+	IMG_XXXX. Inspired by https://ben-mini.github.io/2024/img-0416,
 	memory-gecko runs as a web application. 
 	`,
 	// Uncomment the following line if your bare application
@@ -39,11 +39,11 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.memory-gecko.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "c", "config file (default is $HOME/.memory-gecko)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -53,11 +53,11 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
-		// home, err := os.UserHomeDir()
-		// cobra.CheckErr(err)
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
 
-		// Search config in ./configs file
-		viper.AddConfigPath("./configs")
+		// Search config in home directory with name ".memory-gecko" (without extension).
+		viper.AddConfigPath(home)
 		viper.SetConfigType("json")
 		viper.SetConfigName(".memory-gecko")
 	}
