@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/clholm/memory-gecko/server"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	"github.com/clholm/memory-gecko/server"
 )
 
 var (
@@ -19,6 +21,22 @@ var serveCmd = &cobra.Command{
 	Short: "start the memory-gecko server",
 	Long:  `starts the memory-gecko web server with specified host and port`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// if host/port weren't provided via flags, try to get them from config
+		if host == "" {
+			host = viper.GetString("host")
+		}
+		if port == "" {
+			port = viper.GetString("port")
+		}
+
+		// set defaults if still not configured
+		if host == "" {
+			host = "localhost"
+		}
+		if port == "" {
+			port = "8080"
+		}
+
 		// initialize a context
 		ctx := context.Background()
 
@@ -44,6 +62,10 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 
 	// define flags for host and port
-	serveCmd.Flags().StringVarP(&host, "host", "H", "localhost", "host to bind the server")
-	serveCmd.Flags().StringVarP(&port, "port", "p", "8080", "port to run the server on")
+	serveCmd.Flags().StringVarP(&host, "host", "H", "", "host to bind the server (default: localhost)")
+	serveCmd.Flags().StringVarP(&port, "port", "p", "", "port to run the server on (default: 8080)")
+
+	// bind flags to viper
+	viper.BindPFlag("host", serveCmd.Flags().Lookup("host"))
+	viper.BindPFlag("port", serveCmd.Flags().Lookup("port"))
 }
