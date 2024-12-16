@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/clholm/memory-gecko/server"
+	"github.com/clholm/memory-gecko/youtube"
 )
 
 var (
@@ -37,6 +38,9 @@ var serveCmd = &cobra.Command{
 			port = "8080"
 		}
 
+		// initialize empty videos slice because the serve command doesn't perform YouTube searches
+		videos := []youtube.SearchResult{}
+
 		// initialize a context
 		ctx := context.Background()
 
@@ -48,6 +52,7 @@ var serveCmd = &cobra.Command{
 			os.Stderr,
 			host,
 			port,
+			videos,
 		)
 
 		if err != nil {
@@ -62,8 +67,8 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 
 	// define flags for host and port
-	serveCmd.Flags().StringVarP(&host, "host", "H", "", "host to bind the server (default: localhost)")
-	serveCmd.Flags().StringVarP(&port, "port", "p", "", "port to run the server on (default: 8080)")
+	serveCmd.Flags().StringVarP(&host, "host", "H", "", "host to run the server (default: localhost)")
+	serveCmd.Flags().StringVarP(&port, "port", "p", "", "port to listen on (default: 8080)")
 
 	// bind flags to viper
 	viper.BindPFlag("host", serveCmd.Flags().Lookup("host"))

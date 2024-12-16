@@ -11,14 +11,17 @@ import (
 	"os/signal"
 	"sync"
 	"time"
+
+	"github.com/clholm/memory-gecko/youtube"
 )
 
 // following guide/tips at https://grafana.com/blog/2024/02/09/how-i-write-http-services-in-go-after-13-years/
 
 // config type contains server config info
 type Config struct {
-	Host string
-	Port string
+	Host   string
+	Port   string
+	Videos []youtube.SearchResult
 }
 
 // server constructor
@@ -30,7 +33,7 @@ func NewServer(
 	err := addRoutes(
 		mux,
 		logger,
-		// config,
+		config,
 	)
 	var handler http.Handler = mux
 	if err != nil {
@@ -88,6 +91,7 @@ func Run(
 	stdout io.Writer,
 	stderr io.Writer,
 	host, port string,
+	videos []youtube.SearchResult,
 ) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
