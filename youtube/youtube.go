@@ -41,6 +41,7 @@ func SearchVideos(ctx context.Context, apiKey string) ([]SearchResult, error) {
 	searchString := fmt.Sprintf("IMG_%s", randomNum)
 
 	// create search request
+	// 10 searches is hardcoded for right now
 	call := service.Search.List([]string{"id", "snippet"}).
 		Q(searchString).
 		MaxResults(10).
