@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/clholm/memory-gecko/server"
-	"github.com/clholm/memory-gecko/youtube"
 )
 
 var (
@@ -21,7 +20,7 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "start the memory-gecko server",
 	Long:  `starts the memory-gecko web server with specified host and port`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// if host/port weren't provided via flags, try to get them from config
 		if host == "" {
 			host = viper.GetString("host")
@@ -38,8 +37,13 @@ var serveCmd = &cobra.Command{
 			port = "8080"
 		}
 
-		// initialize empty videos slice because the serve command doesn't perform YouTube searches
-		videos := []youtube.SearchResult{}
+		// get api key
+		if apiKey == "" {
+			apiKey = viper.GetString("api-key")
+		}
+		if apiKey == "" {
+			return fmt.Errorf("api-key is required either via --api-key flag or in config file")
+		}
 
 		// initialize a context
 		ctx := context.Background()
@@ -52,13 +56,15 @@ var serveCmd = &cobra.Command{
 			os.Stderr,
 			host,
 			port,
-			videos,
+			apiKey,
 		)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "server error: %v\n", err)
 			os.Exit(1)
 		}
+
+		return nil
 	},
 }
 

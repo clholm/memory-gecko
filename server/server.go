@@ -11,8 +11,6 @@ import (
 	"os/signal"
 	"sync"
 	"time"
-
-	"github.com/clholm/memory-gecko/youtube"
 )
 
 // following guide/tips at https://grafana.com/blog/2024/02/09/how-i-write-http-services-in-go-after-13-years/
@@ -21,7 +19,7 @@ import (
 type Config struct {
 	Host   string
 	Port   string
-	Videos []youtube.SearchResult
+	APIKey string
 }
 
 // server constructor
@@ -46,9 +44,6 @@ func NewServer(
 }
 
 func serv(logger *log.Logger, config *Config, ctx context.Context, stderr io.Writer) error {
-	// debug: log videos at start of serv
-	fmt.Printf("serv received config with %d videos\n", len(config.Videos))
-
 	// create server instance
 	srv, err := NewServer(
 		logger,
@@ -93,24 +88,17 @@ func Run(
 	stdin io.Reader,
 	stdout io.Writer,
 	stderr io.Writer,
-	host, port string,
-	videos []youtube.SearchResult,
+	host, port, apiKey string,
 ) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
-
-	// debug: log videos at entry point
-	fmt.Printf("server.Run received %d videos\n", len(videos))
 
 	// create Config object
 	config := Config{
 		Host:   host,
 		Port:   port,
-		Videos: videos,
+		APIKey: apiKey,
 	}
-
-	// debug: log videos in config
-	fmt.Printf("server config has %d videos\n", len(config.Videos))
 
 	// create log object
 	loggo := log.New(stdout, "memory-gecko:", log.LstdFlags)

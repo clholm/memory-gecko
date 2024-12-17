@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/clholm/memory-gecko/server"
-	"github.com/clholm/memory-gecko/youtube"
 )
 
 var runCmd = &cobra.Command{
@@ -43,30 +42,6 @@ var runCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		// create channel for search results
-		resultsChan := make(chan []youtube.SearchResult, 1)
-
-		// start search in goroutine
-		go func() {
-			results, err := youtube.SearchVideos(ctx, apiKey)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error searching videos: %v\n", err)
-				close(resultsChan)
-				return
-			}
-			fmt.Printf("youtube search complete, found %d videos\n", len(results))
-			if len(results) == 0 {
-				fmt.Println("warning: no videos found in search")
-			}
-			resultsChan <- results
-		}()
-
-		// wait for results and start server
-		results, ok := <-resultsChan
-		if !ok {
-			return fmt.Errorf("failed to get search results")
-		}
-
 		// start server with search results
 		err := server.Run(
 			ctx,
@@ -75,7 +50,7 @@ var runCmd = &cobra.Command{
 			os.Stderr,
 			host,
 			port,
-			results,
+			apiKey,
 		)
 
 		if err != nil {
