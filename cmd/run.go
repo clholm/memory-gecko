@@ -54,6 +54,10 @@ var runCmd = &cobra.Command{
 				close(resultsChan)
 				return
 			}
+			fmt.Printf("youtube search complete, found %d videos\n", len(results))
+			if len(results) == 0 {
+				fmt.Println("warning: no videos found in search")
+			}
 			resultsChan <- results
 		}()
 

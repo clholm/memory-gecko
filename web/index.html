@@ -36,6 +36,9 @@
 </head>
 <body>
     <div class="video-grid">
+        {{if not .Videos}}
+            <p>No videos found. Please try refreshing the page.</p>
+        {{end}}    
         {{range .Videos}}
         <div>
             <div class="video-container">

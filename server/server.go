@@ -46,6 +46,9 @@ func NewServer(
 }
 
 func serv(logger *log.Logger, config *Config, ctx context.Context, stderr io.Writer) error {
+	// debug: log videos at start of serv
+	fmt.Printf("serv received config with %d videos\n", len(config.Videos))
+
 	// create server instance
 	srv, err := NewServer(
 		logger,
@@ -95,11 +98,20 @@ func Run(
 ) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
+
+	// debug: log videos at entry point
+	fmt.Printf("server.Run received %d videos\n", len(videos))
+
 	// create Config object
 	config := Config{
-		Host: host,
-		Port: port,
+		Host:   host,
+		Port:   port,
+		Videos: videos,
 	}
+
+	// debug: log videos in config
+	fmt.Printf("server config has %d videos\n", len(config.Videos))
+
 	// create log object
 	loggo := log.New(stdout, "memory-gecko:", log.LstdFlags)
 	// call serv
